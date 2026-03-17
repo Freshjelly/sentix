@@ -1,43 +1,136 @@
 # SENTIX — FX Sentiment Monitor
 
-RedditのリアルタイムデータをClaude AIで感情分析する為替センチメントダッシュボード。
+**Reddit × Claude AI × テクニカル指標** を組み合わせたリアルタイム為替センチメントダッシュボード。
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Claude AI](https://img.shields.io/badge/Claude-Sonnet_4.6-orange)](https://anthropic.com/)
+[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?logo=vercel)](https://sentix-steel.vercel.app/)
+
+🔗 **Live Demo**: [https://sentix-steel.vercel.app](https://sentix-steel.vercel.app)
+
+---
+
+## 概要
+
+Reddit の為替・投資コミュニティ（r/Forex, r/investing, r/Economics, r/japan）の投稿を Claude AI がリアルタイム分析し、4通貨ペアのセンチメントスコアを算出。RSI・移動平均などのテクニカル指標と経済指標カレンダーを組み合わせて、複合的な売買シグナルを生成します。
+
+---
+
+## 機能
+
+### センチメント分析
+- Reddit 最新投稿をリアルタイム取得（4 subreddit × 最大15件）
+- Claude Sonnet が各投稿の強気/弱気/中立を判定
+- USD/JPY・EUR/JPY・GBP/JPY・EUR/USD の4ペアにスコア化（0〜100）
+
+### テクニカル指標（Yahoo Finance）
+- **RSI (14期間)** — サーバーサイドで自前計算、30以下で売られすぎ / 70以上で買われすぎ
+- **MA20 / MA50** — 短期・長期移動平均のクロスでトレンド方向を判定
+- **現在価格** — リアルタイム更新
+
+### 複合シグナル
+センチメント × RSI × MAトレンド × 経済指標の有無を統合して 5段階で判定:
+
+| シグナル | 条件 |
+|---------|------|
+| **強い買い** | RSI<30 + センチメント≥65 + 上昇トレンド + 重要指標なし |
+| **買い** | RSI<40 + センチメント≥55 + 下降トレンドでない |
+| **売り** | RSI>60 + センチメント≤45 + 上昇トレンドでない |
+| **強い売り** | RSI>70 + センチメント≤35 + 下降トレンド + 重要指標なし |
+| **様子見** | 上記以外 または 重要指標48時間以内 |
+
+### 経済指標カレンダー
+- Forex Factory API から今週の指標を取得
+- USD / JPY / EUR / GBP に関連するイベントのみ表示
+- 今後48時間以内に絞り込み、重要指標までのカウントダウン表示
+
+### その他
+- **リアルタイム為替レート**（open.er-api.com）
+- **スコア推移グラフ**（Supabase 連携、オプション）
+- **ローディングスケルトン** / **エラーバナー** / **モバイル対応**
+
+---
+
+## アーキテクチャ
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Next.js 14 (App Router)           │
+│                                                     │
+│  app/page.tsx ─── Promise.all ──┬─ /api/rates       │
+│       │                         ├─ /api/technicals  │
+│       │                         └─ /api/calendar    │
+│       │                                             │
+│       ├─ /api/reddit  ──── Reddit Public API        │
+│       └─ /api/analyze ──── Anthropic Claude API     │
+│                                                     │
+│  External APIs (all free / no auth required):       │
+│   • open.er-api.com       — 為替レート              │
+│   • Yahoo Finance         — OHLC データ (RSI/MA)   │
+│   • nfs.faireconomy.media — 経済指標カレンダー      │
+│   • reddit.com/r/*/hot.json — Reddit 投稿           │
+│                                                     │
+│  Optional:                                          │
+│   • Supabase              — スコア履歴保存          │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 技術スタック
+
+| カテゴリ | 技術 |
+|---------|------|
+| フレームワーク | Next.js 14 (App Router) |
+| 言語 | TypeScript 5 |
+| AI | Claude Sonnet 4.6 (Anthropic API) |
+| スタイリング | CSS Variables / Space Mono / Syne |
+| グラフ | Chart.js + react-chartjs-2 |
+| データベース | Supabase (オプション) |
+| デプロイ | Vercel |
+
+---
 
 ## セットアップ
 
-### 1. 依存パッケージのインストール
+### 必要なもの
+- Node.js 18+
+- Anthropic API キー（[取得はこちら](https://console.anthropic.com/)）
+
+### 手順
+
 ```bash
+# リポジトリをクローン
+git clone https://github.com/Freshjelly/sentix.git
+cd sentix
+
+# 依存パッケージをインストール
 npm install
-```
 
-### 2. APIキーの設定
-```bash
+# 環境変数を設定
 cp .env.local.example .env.local
-# .env.local を編集してAPIキーを入力
-```
+# .env.local を開いて ANTHROPIC_API_KEY を入力
 
-### 3. 開発サーバー起動
-```bash
+# 開発サーバーを起動
 npm run dev
 ```
-http://localhost:3000 で開く。
 
-### 使い方
-1. **▶ 取得** ボタンを押す
-2. Reddit から最新投稿を自動取得
-3. Claude AI がセンチメント分析
-4. 各通貨ペアのスコアが表示
+http://localhost:3000 をブラウザで開く。
 
-## 技術スタック
-- Next.js 14 (App Router)
-- Claude Sonnet (Anthropic API)
-- Reddit Public API
-- open.er-api.com (為替レート)
-- Supabase (オプション: 過去データ保存)
-- chart.js / react-chartjs-2 (トレンドグラフ)
+### 環境変数
+
+| 変数名 | 必須 | 説明 |
+|-------|------|------|
+| `ANTHROPIC_API_KEY` | ✅ | Anthropic API キー |
+| `NEXT_PUBLIC_SUPABASE_URL` | ❌ | Supabase プロジェクト URL（トレンドグラフ用） |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ❌ | Supabase 匿名キー（トレンドグラフ用） |
+
+---
 
 ## Supabase セットアップ（オプション）
 
-トレンドグラフ機能を使うには Supabase プロジェクトを作成し、以下のテーブルを作成してください。
+スコア推移グラフを有効にするには Supabase で以下のテーブルを作成:
 
 ```sql
 create table sentiment_history (
@@ -53,10 +146,8 @@ create table sentiment_history (
 );
 ```
 
-`.env.local` に以下を追加:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+---
 
-未設定の場合はトレンドグラフが非表示になりますが、その他の機能は正常動作します。
+## 免責事項
+
+本ツールは学習・研究目的で作成されています。表示されるシグナルは投資判断の根拠とならず、実際の取引への使用は推奨しません。
