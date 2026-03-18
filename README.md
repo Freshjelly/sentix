@@ -153,9 +153,15 @@ alter table sentiment_history enable row level security;
 create policy "Allow public read" on sentiment_history
   for select using (true);
 
--- 書き込み: anon keyからのinsertを許可
-create policy "Allow insert" on sentiment_history
-  for insert with check (true);
+-- 書き込み: 同一ペアの1分以内の連続INSERTを防止
+create policy "Allow insert with rate limit" on sentiment_history
+  for insert with check (
+    not exists (
+      select 1 from sentiment_history sh
+      where sh.pair = pair
+        and sh.created_at > now() - interval '1 minute'
+    )
+  );
 ```
 
 ---
