@@ -69,7 +69,9 @@ export default function Home() {
     try {
       const rRes = await fetch('/api/reddit')
       if (!rRes.ok) throw new Error('reddit')
-      const { posts: fetched } = await rRes.json()
+      const rData = await rRes.json()
+      const fetched: RedditPost[] = rData.posts ?? []
+      if (fetched.length === 0) throw new Error('reddit')
       setPosts(fetched)
       setStatus('analyzing')
       const aRes = await fetch('/api/analyze', {

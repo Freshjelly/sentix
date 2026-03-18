@@ -7,6 +7,9 @@ export async function POST(req: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
 
   const { posts }: { posts: RedditPost[] } = await req.json()
+  if (!posts || posts.length === 0) {
+    return NextResponse.json({ error: 'No posts to analyze' }, { status: 400 })
+  }
   const sample = posts.slice(0, 30)
   const titles = sample.map((p, i) => `${i + 1}. [r/${p.subreddit}] ${p.title}`).join('\n')
 

@@ -69,7 +69,7 @@ export default function TechnicalPanel({ data, pair }: Props) {
           <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--dim)' }}>RSI (14)</span>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
             <span style={{ fontSize: '9px', color }}>{rsiZoneLabel(rsi14)}</span>
-            <span style={{ fontSize: '16px', color, fontFamily: 'var(--font-display)', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{rsi14.toFixed(1)}</span>
+            <span style={{ fontSize: '16px', color, fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{rsi14.toFixed(1)}</span>
           </div>
         </div>
         <RsiBar rsi={rsi14} />
@@ -87,15 +87,15 @@ export default function TechnicalPanel({ data, pair }: Props) {
       <div style={{ display: 'flex', gap: '12px' }}>
         <div>
           <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--dim)', marginBottom: '2px' }}>MA20</div>
-          <div style={{ fontSize: '11px', fontFamily: 'var(--font-display)', color: uptrend ? 'var(--accent)' : 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{formatPrice(pair, ma20)}</div>
+          <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: uptrend ? 'var(--accent)' : 'var(--text)' }}>{formatPrice(pair, ma20)}</div>
         </div>
         <div>
           <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--dim)', marginBottom: '2px' }}>MA50</div>
-          <div style={{ fontSize: '11px', fontFamily: 'var(--font-display)', color: !uptrend ? 'var(--red)' : 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{formatPrice(pair, ma50)}</div>
+          <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: !uptrend ? 'var(--red)' : 'var(--text)' }}>{formatPrice(pair, ma50)}</div>
         </div>
         <div>
           <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--dim)', marginBottom: '2px' }}>現在価格</div>
-          <div style={{ fontSize: '11px', color: 'var(--accent)', fontFamily: 'var(--font-display)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{formatPrice(pair, currentPrice)}</div>
+          <div style={{ fontSize: '11px', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{formatPrice(pair, currentPrice)}</div>
         </div>
       </div>
     </div>
