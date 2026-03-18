@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { RateData } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD', {

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { TechnicalData, Pair } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 const SYMBOLS: Record<Pair, string> = {
   'USD/JPY': 'USDJPY=X',
   'EUR/JPY': 'EURJPY=X',
