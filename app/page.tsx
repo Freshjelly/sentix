@@ -34,6 +34,7 @@ export default function Home() {
   const [rateError, setRateError] = useState(false)
   const [technicals, setTechnicals] = useState<TechnicalData[]>([])
   const [calendar, setCalendar] = useState<EconomicEvent[]>([])
+  const [demoMode, setDemoMode] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date().toLocaleTimeString('ja-JP')), 1000)
@@ -68,10 +69,10 @@ export default function Home() {
 
     try {
       const rRes = await fetch('/api/reddit')
-      if (!rRes.ok) throw new Error('reddit')
       const rData = await rRes.json()
       const fetched: RedditPost[] = rData.posts ?? []
       if (fetched.length === 0) throw new Error('reddit')
+      if (rData.demo) setDemoMode(true); else setDemoMode(false)
       setPosts(fetched)
       setStatus('analyzing')
       const aRes = await fetch('/api/analyze', {
@@ -151,7 +152,10 @@ export default function Home() {
         <div className="panel" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="panel-label">
             <span>Reddit 投稿</span>
-            <span className="post-count">{posts.length > 0 ? `${posts.length} 件` : ''}</span>
+            <span className="post-count">
+              {posts.length > 0 ? `${posts.length} 件` : ''}
+              {demoMode && <span style={{ color: 'var(--yellow)', marginLeft: 8, fontSize: 10 }}>DEMO</span>}
+            </span>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             {isLoading ? <PostsSkeleton /> : <PostsFeed posts={posts} sentiments={sentiments} />}
