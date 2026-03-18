@@ -133,6 +133,7 @@ http://localhost:3000 をブラウザで開く。
 スコア推移グラフを有効にするには Supabase で以下のテーブルを作成:
 
 ```sql
+-- テーブル作成
 create table sentiment_history (
   id uuid default gen_random_uuid() primary key,
   pair text not null,
@@ -144,6 +145,17 @@ create table sentiment_history (
   rate numeric,
   created_at timestamptz default now()
 );
+
+-- RLS有効化
+alter table sentiment_history enable row level security;
+
+-- 読み取り: 公開（anon keyでの取得を許可）
+create policy "Allow public read" on sentiment_history
+  for select using (true);
+
+-- 書き込み: anon keyからのinsertを許可
+create policy "Allow insert" on sentiment_history
+  for insert with check (true);
 ```
 
 ---
